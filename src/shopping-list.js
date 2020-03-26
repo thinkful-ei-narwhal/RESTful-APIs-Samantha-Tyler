@@ -46,6 +46,7 @@ const generateShoppingItemsString = function(shoppingList) {
 };
 
 const render = function() {
+  errorAlert();
   // Filter item list if store prop is true by item.checked === false
   let items = [...store.items];
   if (store.hideCheckedItems) {
@@ -75,9 +76,12 @@ const handleNewItemSubmit = function() {
     api.createItem(newItemName)
       .then(res => res.json()) 
       .then((item) => {store.addItem(item);
-        render();});
-    addItemToShoppingList(newItemName);
-    render();
+        render();
+      })
+      .catch((error) => {
+        store.setError(error.message);
+        errorAlert(); 
+      });
   });
 };
 
@@ -139,9 +143,12 @@ const handleEditShoppingItemSubmit = function() {
       .then(() => {
         store.findAndUpdate(id, {name: itemName});
         render();
+      })
+      .catch((error) => {
+        store.setError(error.message);
+        errorAlert();
       });
-  });
-};
+  });};
 
 const bindEventListeners = function() {
   handleNewItemSubmit();
@@ -156,6 +163,5 @@ export default {
   render,
   bindEventListeners,
   errorAlert,
-  generateError,
-  error
+  generateError
 };
