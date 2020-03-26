@@ -12,3 +12,4 @@ Created for the Thinkful EI Program.
 5. Push to the new repo: `git push -u origin master`
 6. Begin the day's assignment as provided in the curriculum
 
+# RESTful-APIs-Samantha-Tyler
