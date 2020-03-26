@@ -9,8 +9,13 @@ const addItem = function (item) {
   this.items.push(item);
 };
 
+const setError = function(error) {
+  this.error = error;
+};
+
 const findAndUpdate = function (id, newData) {
   const findId = this.findById(id);
+  console.log(findId, newData);
   Object.assign(findId, newData);
 };
 
@@ -31,5 +36,6 @@ export default {
   addItem,
   findAndUpdate,
   findAndDelete,
-  toggleCheckedFilter
+  toggleCheckedFilter,
+  setError
 };

@@ -58,14 +58,14 @@ const render = function() {
   $('.js-shopping-list').html(shoppingListItemsString);
 };
 
-const addItemToShoppingList = function(itemName) {
-  try {
-    item.validateName(itemName);
-    store.items.push(item.create(itemName));
-  } catch (error) {
-    console.log(`Cannot add item: ${error.message}`);
-  }
-};
+// const addItemToShoppingList = function(itemName) {
+//   try {
+//     item.validateName(itemName);
+//     store.items.push(item.create(itemName));
+//   } catch (error) {
+//     console.log(`Cannot add item: ${error.message}`);
+//   }
+// };
 
 const handleNewItemSubmit = function() {
   $('#js-shopping-list-form').submit(function(event) {
@@ -101,7 +101,7 @@ const getItemIdFromElement = function(item) {
 const handleDeleteItemClicked = function() {
   // like in `handleItemCheckClicked`, we use event delegation
   $('.js-shopping-list').on('click', '.js-item-delete', event => {
-    console.log('Delete clicked!')
+    console.log('Delete clicked!');
     const id = getItemIdFromElement(event.currentTarget);
     api.deleteItem(id)
       .then(res => res.json())
@@ -156,5 +156,6 @@ export default {
   render,
   bindEventListeners,
   errorAlert,
-  generateError
+  generateError,
+  error
 };
