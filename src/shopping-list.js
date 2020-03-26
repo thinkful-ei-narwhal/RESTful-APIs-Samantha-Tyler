@@ -1,6 +1,6 @@
 import $ from 'jquery';
-import store from "./store";
-import api from "./api";
+import store from './store';
+import api from './api';
 //import item from "./item";
 
 const generateItemElement = function(item) {
@@ -27,9 +27,22 @@ const generateItemElement = function(item) {
     </li>`;
 };
 
+const generateError = function(message) {
+  return `<div class="errorDiv"><p>${message}</p></div>`;
+};
+
+const errorAlert = function(message) {
+  if (store.error) {
+    const mkError = generateError(store.error);
+    $('.errorBox').html(mkError);
+  } else {
+    $('.errorBox').html('');
+  }
+};
+
 const generateShoppingItemsString = function(shoppingList) {
   const items = shoppingList.map(item => generateItemElement(item));
-  return items.join("");
+  return items.join('');
 };
 
 const render = function() {
@@ -38,10 +51,11 @@ const render = function() {
   if (store.hideCheckedItems) {
     items = items.filter(item => !item.checked);
   }
+  
   // render the shopping list in the DOM
   const shoppingListItemsString = generateShoppingItemsString(items);
   // insert that HTML into the DOM
-  $(".js-shopping-list").html(shoppingListItemsString);
+  $('.js-shopping-list').html(shoppingListItemsString);
 };
 
 const addItemToShoppingList = function(itemName) {
@@ -54,39 +68,47 @@ const addItemToShoppingList = function(itemName) {
 };
 
 const handleNewItemSubmit = function() {
-  $("#js-shopping-list-form").submit(function(event) {
+  $('#js-shopping-list-form').submit(function(event) {
     event.preventDefault();
-    const newItemName = $(".js-shopping-list-entry").val();
-    $(".js-shopping-list-entry").val("");
+    const newItemName = $('.js-shopping-list-entry').val();
+    $('.js-shopping-list-entry').val('');
     api.createItem(newItemName)
-  .then(res => res.json()) 
-  .then((item) => {store.addItem(item)
-  render()})
+      .then(res => res.json()) 
+      .then((item) => {store.addItem(item);
+        render();});
     addItemToShoppingList(newItemName);
     render();
   });
 };
 
 const handleItemCheckClicked = function() {
-  $(".js-shopping-list").on("click", ".js-item-toggle", event => {
+  $('.js-shopping-list').on('click', '.js-item-toggle', event => {
     const id = getItemIdFromElement(event.currentTarget);
-    store.findAndToggleChecked(id);
+    const item = store.findById(id);
+    api.updateItem(id, {checked: !item.checked})
+      .then(() => {
+        store.findAndUpdate(id, {checked: !item.checked});});
     render();
   });
 };
 
 const getItemIdFromElement = function(item) {
   return $(item)
-    .closest(".js-item-element")
-    .data("item-id");
+    .closest('.js-item-element')
+    .data('item-id');
 };
 
 const handleDeleteItemClicked = function() {
   // like in `handleItemCheckClicked`, we use event delegation
-  $(".js-shopping-list").on("click", ".js-item-delete", event => {
+  $('.js-shopping-list').on('click', '.js-item-delete', event => {
+    console.log('Delete clicked!')
     const id = getItemIdFromElement(event.currentTarget);
-    store.findAndDelete(id);
-    render();
+    api.deleteItem(id)
+      .then(res => res.json())
+      .then(() => {
+        store.findAndDelete(id);
+        render();
+      });
   });
 };
 
@@ -102,21 +124,22 @@ const toggleCheckedItemsFilter = function() {
  * for hiding completed items.
  */
 const handleToggleFilterClick = function() {
-  $(".js-filter-checked").click(() => {
+  $('.js-filter-checked').click(() => {
     store.toggleCheckedFilter();
     render();
   });
 };
 
 const handleEditShoppingItemSubmit = function() {
-  $(".js-shopping-list").on("submit", ".js-edit-item", event => {
+  $('.js-shopping-list').on('submit', '.js-edit-item', event => {
     event.preventDefault();
     const id = getItemIdFromElement(event.currentTarget);
-    const itemName = $(event.currentTarget)
-      .find(".shopping-item")
-      .val();
-    store.findAndUpdateName(id, itemName);
-    render();
+    const itemName = $(event.currentTarget).find('.shopping-item').val();
+    api.updateItem(id, {itemName})
+      .then(() => {
+        store.findAndUpdate(id, {name: itemName});
+        render();
+      });
   });
 };
 
@@ -131,5 +154,7 @@ const bindEventListeners = function() {
 // This object contains the only exposed methods from this module:
 export default {
   render,
-  bindEventListeners
+  bindEventListeners,
+  errorAlert,
+  generateError
 };
